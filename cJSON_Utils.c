@@ -201,6 +201,7 @@ CJSON_PUBLIC(char *) cJSONUtils_FindPointerFromObjectTo(const cJSON * const obje
         {
             if (cJSON_IsArray(object))
             {
+                size_t full_pointer_length = strlen((char*)target_pointer) + 20 + sizeof("/");
                 /* reserve enough memory for a 64 bit integer + '/' and '\0' */
                 unsigned char *full_pointer = (unsigned char*)cJSON_malloc(strlen((char*)target_pointer) + 20 + sizeof("/"));
                 /* check if conversion to unsigned long is valid
@@ -211,7 +212,7 @@ CJSON_PUBLIC(char *) cJSONUtils_FindPointerFromObjectTo(const cJSON * const obje
                     cJSON_free(target_pointer);
                     return NULL;
                 }
-                sprintf((char*)full_pointer, "/%lu%s", (unsigned long)child_index, target_pointer); /* /<array_index><path> */
+                sprintf_s((char*)full_pointer, full_pointer_length, "/%lu%s", (unsigned long)child_index, target_pointer); /* /<array_index><path> */
                 cJSON_free(target_pointer);
 
                 return (char*)full_pointer;
@@ -1090,9 +1091,10 @@ static void compose_patch(cJSON * const patches, const unsigned char * const ope
     {
         size_t suffix_length = pointer_encoded_length(suffix);
         size_t path_length = strlen((const char*)path);
+        size_t full_path_length = path_length + suffix_length + sizeof("/");
         unsigned char *full_path = (unsigned char*)cJSON_malloc(path_length + suffix_length + sizeof("/"));
 
-        sprintf((char*)full_path, "%s/", (const char*)path);
+        sprintf_s((char*)full_path, full_path_length, "%s/", (const char*)path);
         encode_string_as_pointer(full_path + path_length + 1, suffix);
 
         cJSON_AddItemToObject(patch, "path", cJSON_CreateString((const char*)full_path));
@@ -1143,6 +1145,7 @@ static void create_patches(cJSON * const patches, const unsigned char * const pa
         case cJSON_Array:
         {
             size_t index = 0;
+            size_t new_path_length = strlen((const char*)path) + 20 + sizeof("/");
             cJSON *from_child = from->child;
             cJSON *to_child = to->child;
             unsigned char *new_path = (unsigned char*)cJSON_malloc(strlen((const char*)path) + 20 + sizeof("/")); /* Allow space for 64bit int. log10(2^64) = 20 */
@@ -1158,7 +1161,7 @@ static void create_patches(cJSON * const patches, const unsigned char * const pa
                     cJSON_free(new_path);
                     return;
                 }
-                sprintf((char*)new_path, "%s/%lu", path, (unsigned long)index); /* path of the current array element */
+                sprintf_s((char*)new_path, new_path_length, "%s/%lu", path, (unsigned long)index); /* path of the current array element */
                 create_patches(patches, new_path, from_child, to_child, case_sensitive);
             }
 
@@ -1173,7 +1176,7 @@ static void create_patches(cJSON * const patches, const unsigned char * const pa
                     cJSON_free(new_path);
                     return;
                 }
-                sprintf((char*)new_path, "%lu", (unsigned long)index);
+                sprintf_s((char*)new_path, sizeof((char*)new_path), "%lu", (unsigned long)index);
                 compose_patch(patches, (const unsigned char*)"remove", path, new_path, NULL);
             }
             /* add new elements in 'to' that were not in 'from' */
@@ -1216,9 +1219,10 @@ static void create_patches(cJSON * const patches, const unsigned char * const pa
                     /* both object keys are the same */
                     size_t path_length = strlen((const char*)path);
                     size_t from_child_name_length = pointer_encoded_length((unsigned char*)from_child->string);
+                    size_t new_path_length = path_length + from_child_name_length + sizeof("/");
                     unsigned char *new_path = (unsigned char*)cJSON_malloc(path_length + from_child_name_length + sizeof("/"));
 
-                    sprintf((char*)new_path, "%s/", path);
+                    sprintf_s((char*)new_path, new_path_length, "%s/", path);
                     encode_string_as_pointer(new_path + path_length + 1, (unsigned char*)from_child->string);
 
                     /* create a patch for the element */

@@ -1,7 +1,20 @@
 # cJSON
-
-Ultralightweight JSON parser in ANSI C.
-
+  
+Ultralightweight JSON parser in ANSI C for Intel SGX. Forked from `DaveGamble/cJSON`.
+  
+Modifications:
+    
+    sscanf  -> sgx_sscanf
+    strcpy  -> strncpy
+    strcat  -> strncat
+    sprintf -> sprintf_s
+    
+Usage:
+  
+Copy `cJSON.c`, `cJSON.h`, `cJSON_Utils.c`, `cJSON_Utils.h`, `Ocall_wrappers.cpp`, `Ocall_wrappers.h` to your own sgx project (Or merge `Ocall_wrappers.cpp`, `Ocall_wrappers.h` to your Ocall wrappers file).
+  
+**Not fully tested!** 
+  
 ## Table of contents
 * [License](#license)
 * [Usage](#usage)

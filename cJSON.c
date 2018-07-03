@@ -88,7 +88,7 @@ CJSON_PUBLIC(char *) cJSON_GetStringValue(cJSON *item) {
 CJSON_PUBLIC(const char*) cJSON_Version(void)
 {
     static char version[15];
-    sprintf(version, "%i.%i.%i", CJSON_VERSION_MAJOR, CJSON_VERSION_MINOR, CJSON_VERSION_PATCH);
+    sprintf_s(version, sizeof(version), "%i.%i.%i", CJSON_VERSION_MAJOR, CJSON_VERSION_MINOR, CJSON_VERSION_PATCH);
 
     return version;
 }
@@ -489,18 +489,18 @@ static cJSON_bool print_number(const cJSON * const item, printbuffer * const out
     /* This checks for NaN and Infinity */
     if ((d * 0) != 0)
     {
-        length = sprintf((char*)number_buffer, "null");
+        length = sprintf_s((char*)number_buffer, sizeof((char*)number_buffer), "null");
     }
     else
     {
         /* Try 15 decimal places of precision to avoid nonsignificant nonzero digits */
-        length = sprintf((char*)number_buffer, "%1.15g", d);
+        length = sprintf_s((char*)number_buffer, sizeof((char*)number_buffer), "%1.15g", d);
 
         /* Check whether the original double can be recovered */
         if ((sscanf((char*)number_buffer, "%lg", &test) != 1) || ((double)test != d))
         {
             /* If not, print with 17 decimal places of precision */
-            length = sprintf((char*)number_buffer, "%1.17g", d);
+            length = sprintf_s((char*)number_buffer, sizeof((char*)number_buffer), "%1.17g", d);
         }
     }
 
@@ -933,7 +933,7 @@ static cJSON_bool print_string_ptr(const unsigned char * const input, printbuffe
                     break;
                 default:
                     /* escape and print as unicode codepoint */
-                    sprintf((char*)output_pointer, "u%04x", *input_pointer);
+                    sprintf_s((char*)output_pointer, 5, "u%04x", *input_pointer);
                     output_pointer += 4;
                     break;
             }

@@ -35,6 +35,9 @@ extern "C"
 
 #include <stddef.h>
 
+// for sgx
+#include "Ocall_wrappers.h"
+
 /* cJSON Types: */
 #define cJSON_Invalid (0)
 #define cJSON_False  (1 << 0)
